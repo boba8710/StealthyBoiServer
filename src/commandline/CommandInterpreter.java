@@ -21,7 +21,7 @@ public class CommandInterpreter implements Runnable{
 	}
 	public void run() {
 		while(true) {
-			System.out.print("ζ>");
+			System.out.print("SB>");
 			String command = in.nextLine();
 			if(command.startsWith("help")) {
 				for(String c:commands) {
