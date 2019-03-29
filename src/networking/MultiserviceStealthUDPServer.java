@@ -21,7 +21,7 @@ public class MultiserviceStealthUDPServer extends Thread {
     
     private byte[] buf = new byte[1024];
     Random rand;
-    private String totalRecieved = "";
+    public static String totalRecieved = "";
     public MultiserviceStealthUDPServer(int randSeed) throws SocketException {
         rand = new Random(randSeed);
         
@@ -29,6 +29,7 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts.add(53);
         availablePorts.add(5355);
         availablePorts.add(67);
+        availablePorts.add(123);
     }//test
     public void startAllServers(){
     	final ExecutorService executor = Executors.newCachedThreadPool();
@@ -68,6 +69,9 @@ public class MultiserviceStealthUDPServer extends Thread {
     	}else if(port == 67){
     		temp[0]=4;
     		temp[1]=8;
+    	}else if(port == 123) {
+    		temp[0]=12;
+    		temp[1]=16;
     	}else{
     		temp[0]=0;
     		temp[1]=-1;
@@ -108,7 +112,6 @@ public class MultiserviceStealthUDPServer extends Thread {
             	}
             }
             totalRecieved+=recvMessage;
-            System.out.println(totalRecieved);
             System.out.println("	Recieved message: "+recvMessage);
             Arrays.fill(buf,(byte)0);
         }
