@@ -30,7 +30,16 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts.add(5355);
         availablePorts.add(67);
         availablePorts.add(123);
-    }//test
+    }
+    public MultiserviceStealthUDPServer() throws SocketException {
+        rand = new Random();
+        
+        availablePorts = new ArrayList<Integer>();
+        availablePorts.add(53);
+        availablePorts.add(5355);
+        availablePorts.add(67);
+        availablePorts.add(123);
+    }
     public void startAllServers(){
     	final ExecutorService executor = Executors.newCachedThreadPool();
     	final List<Future<?>> futures = new ArrayList<>();

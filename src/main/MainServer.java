@@ -1,21 +1,26 @@
 package main;
 
+import java.io.IOException;
 import java.net.SocketException;
 
-import commandline.CommandInterpreter;
+import commandline.LocalCommandInterpreter;
+import networking.CommandServer;
 import networking.MultiserviceStealthUDPServer;
 
 public class MainServer {
 	public static void main(String[] args) {
 		try {
-			CommandInterpreter ci = new CommandInterpreter();
-			Thread t = new Thread(ci);
-			t.start();
-			MultiserviceStealthUDPServer mssus = new MultiserviceStealthUDPServer(1337);
+			CommandServer cs = new CommandServer();
+			Thread t2 = new Thread(cs);
+			t2.start();
+			MultiserviceStealthUDPServer mssus = new MultiserviceStealthUDPServer();
 			mssus.startAllServers();
 			} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 }
