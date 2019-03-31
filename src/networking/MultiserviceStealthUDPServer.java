@@ -1,11 +1,13 @@
 package networking;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.BindException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,9 +21,9 @@ public class MultiserviceStealthUDPServer extends Thread {
     
     List<Integer> availablePorts;
     
-    private byte[] buf = new byte[1024];
+    private byte[] buf = new byte[16];
     Random rand;
-    public static String totalRecieved = "";
+    public static ArrayList<Byte> totalRecieved = new ArrayList<Byte>(); //Good luck with that shit
     public MultiserviceStealthUDPServer(int randSeed) throws SocketException {
         rand = new Random(randSeed);
         
@@ -100,7 +102,6 @@ public class MultiserviceStealthUDPServer extends Thread {
     	int[] dataBounds = port2DataStartEnd(port);
     	System.out.println("[+] Server Run Started for port: "+port);
         while (true) {
-        	System.out.println("[~] Awaiting new packets...");
             DatagramPacket packet 
               = new DatagramPacket(buf, buf.length);
             try {
@@ -111,17 +112,34 @@ public class MultiserviceStealthUDPServer extends Thread {
 				e.printStackTrace();
 			}
             String recvMessage = "";
-            System.out.println("[!] Packet Recieved on port "+port);
             if(dataBounds[1]==-1){
             	recvMessage = new String(buf);
             }
             else{
+            	byte[] strBuf = new byte[dataBounds[1]-dataBounds[0]];
             	for(int i = dataBounds[0]; i < dataBounds[1]; i++){
-            		recvMessage+=(char)buf[i];
+            		strBuf[i-dataBounds[0]] = buf[i];
+            		//if(buf[i]==(byte)0x81){
+            		//	System.out.println("[D] "+(char)buf[i]); 	//whomst the FUCK DID THIS????
+            														//WHY THE /FUCK/ DOES 0x81 -> '?' THAT'S NOT A F U C K I N G THING
+            														//SAME WITH 0x8f DID ANYONE LOOK AT THE ASCII TABLE????? FUCK THIS SHIT
+            		//}
+            		//if(buf[i]==(byte)0x8f){
+            		//	System.out.println("[D] "+(char)buf[i]);
+            		//}
             	}
+
+				try {
+					recvMessage+=new String(strBuf,"UTF-16"); 	//Alright, fine I'll re-write this with ArrayList<Byte> instead of string
+																//BUT WHOEVER DESIGNED THIS SHIT CAN SUCK A CALLAPILLA DICK
+				} catch (UnsupportedEncodingException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
             }
             totalRecieved+=recvMessage;
-            System.out.println("	Recieved message: "+recvMessage);
+            System.out.print(recvMessage);
             Arrays.fill(buf,(byte)0);
         }
     }
