@@ -27,6 +27,7 @@ public class MultiserviceStealthUDPServer extends Thread {
     
     public static int[] sequencePositions = new int[256];
     
+    @Deprecated
     public MultiserviceStealthUDPServer(int randSeed) throws SocketException {
         rand = new Random(randSeed);
         
@@ -47,8 +48,11 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts = new ArrayList<Integer>();
         availablePorts.add(53);
         availablePorts.add(5355);
-        availablePorts.add(67);
-        availablePorts.add(123);
+        availablePorts.add(67);  //malformed
+        availablePorts.add(123); //malformed
+        //ADD NBNS: Port 137
+        //ADD SNMP: Port 161
+        
     }
     public void startAllServers(){
     	final ExecutorService executor = Executors.newCachedThreadPool();

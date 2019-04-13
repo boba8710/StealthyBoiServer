@@ -9,6 +9,7 @@ import networking.MultiserviceStealthUDPServer;
 
 public class MainServer {
 	public static void main(String[] args) {
+		System.out.println(System.getProperty("os.name"));
 		try {
 			CommandServer cs = new CommandServer();
 			Thread t2 = new Thread(cs);
