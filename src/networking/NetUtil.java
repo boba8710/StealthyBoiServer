@@ -12,7 +12,7 @@ public class NetUtil {
         {
         	String partString = string.substring(i, Math.min(len, i + partitionSize));
         	while(partString.length() != partitionSize){
-        		partString=partString+"0";
+        		partString=partString+" ";
         	}
             parts.add(partString);
         }

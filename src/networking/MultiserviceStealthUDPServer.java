@@ -48,8 +48,8 @@ public class MultiserviceStealthUDPServer extends Thread {
         availablePorts = new ArrayList<Integer>();
         availablePorts.add(53);
         availablePorts.add(5355);
-        availablePorts.add(67);  //malformed
-        availablePorts.add(123); //malformed
+        availablePorts.add(67);
+        availablePorts.add(123);
         //ADD NBNS: Port 137
         //ADD SNMP: Port 161
         
@@ -93,8 +93,8 @@ public class MultiserviceStealthUDPServer extends Thread {
     		temp[0]=4;
     		temp[1]=7;
     	}else if(port == 123) {
-    		temp[0]=12;
-    		temp[1]=15;
+    		temp[0]=8;
+    		temp[1]=11;
     	}else{
     		temp[0]=0;
     		temp[1]=-1;
@@ -133,8 +133,15 @@ public class MultiserviceStealthUDPServer extends Thread {
             		dataBuf[i-dataBounds[0]] = buf[i];
             	}
             }
-            System.out.println("Recieved pack no. "+toUnsigned(buf[dataBounds[1]]));
-            ExfilUDPPacket curPack = new ExfilUDPPacket(dataBuf, buf[dataBounds[1]],sequencePositions[toUnsigned(buf[dataBounds[1]])]++);
+            for(int i = 0; i < dataBuf.length;i++){
+            	dataBuf[i]=(byte) (dataBuf[i]^0x7f);
+            }
+            int packetNo = 0;
+            packetNo^=sequencePositions[toUnsigned(buf[dataBounds[1]])]++;
+            packetNo<<=8;
+            packetNo^=toUnsigned(buf[dataBounds[1]]);
+            System.out.println("Recieved pack no. "+packetNo);
+            ExfilUDPPacket curPack = new ExfilUDPPacket(dataBuf, packetNo);
             recieveQueue.add(curPack);
             Arrays.fill(buf,(byte)0);
         }

@@ -1,13 +1,13 @@
 package networking;
 
-public class ExfilUDPPacket implements Comparable{
+public class ExfilUDPPacket implements Comparable<ExfilUDPPacket>{
 	private byte[] data; 
 	private int seqNum;
 	private int seqPos;
-	public ExfilUDPPacket(byte[] data, int seqPos, int seqNum){
+	private int identifier = 0;
+	public ExfilUDPPacket(byte[] data, int identifier){
 		this.data=data;
-		this.seqNum=seqNum;
-		this.seqPos=seqPos;
+		this.identifier=identifier;
 	}
 	public byte[] getData(){
 		return this.data;
@@ -18,21 +18,18 @@ public class ExfilUDPPacket implements Comparable{
 	public int getSeqPos() {
 		return seqPos;
 	}
+	public int getIdentifier(){
+		return identifier;
+	}
 	@Override
-	public int compareTo(Object o) {
-		ExfilUDPPacket input =(ExfilUDPPacket)o;
-		int inputSeqNum = input.getSeqNum();
-		int inputSeqPos = input.getSeqPos();
-		if(inputSeqNum > this.getSeqNum()){
-			return 1;
-		}else if(inputSeqNum < this.getSeqNum()){
+	public int compareTo(ExfilUDPPacket arg0) {
+		if(arg0.getIdentifier() > this.getIdentifier()){
 			return -1;
-		}else if(inputSeqPos > this.getSeqPos()){
+		}else if(arg0.getIdentifier() < this.getIdentifier()){
 			return 1;
-		}else if(inputSeqNum < this.getSeqPos()){
-			return -1;
+		}else{
+			return 0;
 		}
-		return 0;
 	}
 	
 }

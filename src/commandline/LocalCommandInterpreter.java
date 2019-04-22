@@ -79,6 +79,11 @@ public class LocalCommandInterpreter{
 			
 		}else if(command.equals("/quit")){
 			System.exit(0);
+		}else if(command.equals("/debug")){
+			int it = 0;
+			for(int i : MultiserviceStealthUDPServer.sequencePositions){
+				System.out.println((it++)+"	:	"+i);
+			}
 		}else{
 			System.out.println("Unrecognized Command. Available Commands: \n\n");
 			for(String c:commands) {
