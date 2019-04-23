@@ -1,0 +1,49 @@
+ Volume in drive C has no label.
+ Volume Serial Number is E4E0-4B50
+
+ Directory of C:\
+
+11/28/2015  04:19 PM    <DIR>          2015YTDownloads
+10/14/2016  04:42 PM    <DIR>          AdwCleaner
+04/14/2018  10:12 PM    <DIR>          Autodesk
+05/06/2018  02:17 PM                 0 autoexec.bat
+01/25/2017  11:01 PM    <DIR>          b534380814c426aa70f2a48644c6
+03/12/2014  01:51 PM    <DIR>          Breaking Point
+05/26/2017  04:03 PM    <DIR>          CSharpApps
+04/23/2017  08:55 PM    <DIR>          customWindowTitle
+09/23/2018  12:08 PM    <DIR>          Eclipse
+10/13/2016  11:37 PM    <DIR>          Fraps
+09/28/2014  09:47 AM    <DIR>          FRST
+10/27/2015  05:15 PM    <DIR>          FTB
+10/21/2015  04:05 PM    <DIR>          Games
+01/06/2017  01:32 AM    <DIR>          Go
+03/08/2017  07:56 PM    <DIR>          GTANetwork
+01/24/2017  11:52 PM    <DIR>          hashcat-3.30
+03/05/2013  09:51 AM    <DIR>          Intel
+06/25/2018  08:25 PM    <DIR>          Just Cause 2
+10/11/2016  07:13 PM    <DIR>          metasploit
+09/16/2017  04:56 PM    <DIR>          MinGW
+01/04/2015  03:21 PM    <DIR>          Nexus Mod Manager
+10/19/2013  06:59 PM    <DIR>          OpenTTD
+09/02/2013  11:24 AM    <DIR>          package
+08/22/2013  11:22 AM    <DIR>          PerfLogs
+04/07/2019  02:17 PM    <DIR>          Program Files
+03/28/2019  01:59 AM    <DIR>          Program Files (x86)
+09/14/2018  10:42 PM    <DIR>          Python27
+08/19/2014  03:52 PM    <DIR>          Rodina
+11/02/2015  04:41 PM    <DIR>          srcds
+02/08/2015  10:13 PM    <DIR>          Support
+12/03/2018  08:22 PM    <DIR>          SymCache
+05/20/2013  09:26 AM    <DIR>          TA2DST
+12/26/2018  02:53 PM    <DIR>          temp
+03/22/2013  07:22 PM    <DIR>          Ultimate
+12/12/2016  06:33 AM    <DIR>          uninst
+01/25/2017  10:55 PM    <DIR>          Users
+04/09/2019  03:55 PM    <DIR>          Windows
+03/02/2018  03:27 PM                35 windows-version.txt
+12/18/2016  08:19 AM    <DIR>          Windows.old
+04/23/2017  08:24 PM    <DIR>          withthediscordAPI
+10/13/2016  09:57 PM    <DIR>          Workspace
+10/13/2016  11:36 PM    <DIR>          wuat
+               2 File(s)             35 bytes
+              40 Dir(s)  666,979,188,736 bytes free
